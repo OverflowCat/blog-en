@@ -1,0 +1,8 @@
+{
+  "name": "neko-blog-en",
+  // Update to today's date
+  "compatibility_date": "2025-07-26",
+  "assets": {
+    "directory": "./dist"
+  }
+}

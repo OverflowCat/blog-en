@@ -1,0 +1,15 @@
+---
+export type Props = {
+  text: string
+  weight: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
+}
+const { text, weight } = Astro.props
+const code = `
+#set text(2em, font: "Sart Sans", weight: ${weight}, fill: black)
+#let t = ${JSON.stringify(text)}
+#for word in t.split() { box(html.frame(word))
+box(html.frame(" ")) }
+`
+---
+
+{text}

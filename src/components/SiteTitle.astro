@@ -1,11 +1,11 @@
 ---
 import { themeConfig } from '~/.config'
-
+import Subtitle from './sart-sans/subtitle.typ'
 const { title, subtitle } = themeConfig.site
 ---
 
 <hgroup
-  lg="write-vertical-right items-start b-l-2px b-l-primary text-left"
+  lg="write-vertical-left items-start b-l-2px b-l-primary text-start"
   flex="~ col gap-2.5"
   class="cursor-pointer text-center duration-800 ease-in-out"
 >
@@ -15,7 +15,20 @@ const { title, subtitle } = themeConfig.site
     hover:lg=" bg-primary color-background"
     href="/"
   >
-    <h3 class="text-5 font-extrabold font-header">{subtitle}</h3>
-    <h1 class="text-8 font-extrabold font-header">{title}</h1>
+    <h3 class="text-5 font-extrabold font-header hidden" lg="block">
+      {subtitle}
+    </h3>
+    <h1 class="text-8 font-extrabold font-header hidden" lg="block">{title}</h1>
+    <h1 class="text-8 font-extrabold font-header flex items-center justify-center mbe-3" id="subtitle-h" lg="hidden">
+      <Subtitle />
+    </h1>
   </a>
 </hgroup>
+
+<style is:global>
+  @media (prefers-color-scheme: dark) {
+    #subtitle-h {
+      filter: invert(1);
+    }
+  }
+</style>

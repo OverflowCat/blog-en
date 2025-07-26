@@ -1,12 +1,15 @@
 import mdx from '@astrojs/mdx'
 import sitemap from '@astrojs/sitemap'
 import swup from '@swup/astro'
-import robotsTxt from 'astro-robots-txt'
+import { typst } from 'astro-typst'
 import { defineConfig } from 'astro/config'
+// @ts-expect-error: no types
+import remarkFigureCaption from 'gridsome-remark-figure-caption'
 import rehypeKatex from 'rehype-katex'
 import remarkMath from 'remark-math'
 import UnoCSS from 'unocss/astro'
 import devtoolsJson from 'vite-plugin-devtools-json'
+
 import { themeConfig } from './src/.config'
 
 // https://astro.build/config
@@ -20,10 +23,14 @@ export default defineConfig({
       // @ts-ignore
       devtoolsJson(),
     ],
+    ssr: {
+      external: ['@myriaddreamin/typst-ts-node-compiler'],
+    },
   },
   markdown: {
     remarkPlugins: [
       remarkMath,
+      remarkFigureCaption,
     ],
     rehypePlugins: [
       rehypeKatex,
@@ -36,7 +43,7 @@ export default defineConfig({
   integrations: [
     UnoCSS({ injectReset: true }),
     mdx({}),
-    robotsTxt(),
+    // robotsTxt(),
     sitemap(),
     swup({
       theme: false,
@@ -47,6 +54,23 @@ export default defineConfig({
       smoothScrolling: true,
       updateHead: true,
       updateBodyClass: true,
+    }),
+    typst({
+      options: {
+        remPx: 14,
+      },
+      target: (id: string) => {
+        console.debug(`Detecting ${id}`)
+        if (id.endsWith('.html.typ') || id.includes('/html/'))
+          return 'html'
+        return 'svg'
+      },
+      // emitSvg: true,
+      // emitSvgDir: ".astro/typst"
+      // fontArgs: [
+      //   { fontPaths: ['/system/fonts', '/user/fonts'] },
+      //   { fontBlobs: [customFontBuffer] }
+      // ],
     }),
   ],
 })
