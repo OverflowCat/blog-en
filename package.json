@@ -9,6 +9,7 @@
   "repository": "https://github.com/moeyua/astro-theme-typography",
   "scripts": {
     "dev": "astro check && astro dev",
+    "dep": "astro build && wrangler deploy",
     "build": "astro check && astro build",
     "preview": "astro preview",
     "lint": "eslint .",

@@ -9,7 +9,7 @@ export const defaultConfig: ThemeConfig = {
     subtitle: 'OverflowCat\'s Blog',
     author: 'OverflowCat',
     description: 'So fancy is the world, who knows, maybe they sing',
-    website: 'https://astro-theme-typography.vercel.app/',
+    website: 'https://blog.overflow.cat/',
     pageSize: 5,
     socialLinks: [
       {
