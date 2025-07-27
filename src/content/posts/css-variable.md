@@ -12,7 +12,7 @@ My friend [yzqzss](https://github.com/yzqzss) showed me a piece of code found in
 
 ![Current VS Code syntax highlighting fails to recognize it correctly](https://github.com/user-attachments/assets/170edbc5-bb83-485b-8111-3c9946fcaced)
 
-After some digging, I found that according to the spec, an identifier (`<ident-token>`) cannot start with a number. However, for CSS custom properties (variables) that start with a double dash `--`, the name that follows *can* start with a digit.
+After some digging, I found that according to the spec, an identifier (`<ident-token>`) cannot start with a number. However, for CSS variables that start with a double dash `--`, the name that follows *can* start with a digit.
 
 ![](https://github.com/user-attachments/assets/14bcdf20-05e6-4e36-a201-ae3268e8a237)
 

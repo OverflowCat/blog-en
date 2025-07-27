@@ -56,7 +56,8 @@ const openGraph: SEOProps['openGraph'] = {
 
 async function getOptimizedImageURL() {
   const image = props.banner && (await getImage({ src: props.banner, format: 'jpeg' }))
-  return new URL(image?.src ?? '/placeholder.png', Astro.url).toString()
+  return 'https://remnote-user-data.s3.amazonaws.com/nGuv6zzhb1gyLb5dbbm_dPg7pcq33bzTYxR690if4httOjUC6XoJSANGzK6zekJZiOtSygYn5bjQtAIAl1G2mG7nsgwQY9qCRKLIM_kxdT1Nn7WPp5-PDCADkBR45Zyn.jpeg'
+  // return new URL(image?.src ?? '/placeholder.png', Astro.url).toString()
 }
 ---
 

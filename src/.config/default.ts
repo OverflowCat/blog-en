@@ -8,7 +8,7 @@ export const defaultConfig: ThemeConfig = {
     title: 'ᡥᠠᡳᡤᡳᠶᠠ ᡥᠠᠯᠠ·ᠨᡝᡴᠣᡳ ᠵᠠᠯᠠᠨ',
     subtitle: 'OverflowCat\'s Blog',
     author: 'OverflowCat',
-    description: 'Rediscory the beauty of typography',
+    description: 'So fancy is the world, who knows, maybe they sing',
     website: 'https://astro-theme-typography.vercel.app/',
     pageSize: 5,
     socialLinks: [
@@ -85,8 +85,8 @@ export const defaultConfig: ThemeConfig = {
     // disqus: { shortname: "typography-astro" },
   },
   analytics: {
-    googleAnalyticsId: '',
-    umamiAnalyticsId: '',
+    googleAnalyticsId: 'G-C0G0C19ZT7',
+    umamiAnalyticsId: 'c21cb366-bd01-46dd-ba04-68a349be01fb',
   },
   latex: {
     katex: false,
