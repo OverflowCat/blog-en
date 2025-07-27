@@ -1,0 +1,64 @@
+---
+import { NodeCompiler } from '@myriaddreamin/typst-ts-node-compiler'
+
+declare global {
+  var compiler: NodeCompiler | undefined
+}
+
+if (!globalThis.compiler) {
+  globalThis.compiler = NodeCompiler.create()
+}
+
+const compiler = globalThis.compiler as NodeCompiler
+
+type TypstDocInput = any
+
+export type Props = ({ code: string } | { src: string } | { input: TypstDocInput }) & TypstOptions
+
+export type TypstOptions = {
+  /**
+   * Whether to add default style for anchors to function.
+   *
+   * If you have multiple svg elements in the same page,
+   * you may want to set this to `false`, and import
+   * the stylesheet manually.
+   *
+   * @default true
+   */
+  style?: boolean
+  /**
+   * The width of the SVG element.
+   * If not set, the width will be calculated based on the content.
+   * You may want to set this to `"100%"` to fit the container.`
+   *  @default undefined */
+  width?: string | number
+  /**
+   * The height of the SVG element.
+   * If not set, the height will be calculated based on the content.
+   * You may want to set this to `"auto"` to fit the container.
+   *  @default undefined */
+  height?: string | number
+  /** @default {} */
+  props?: Record<string, string>
+  /** @default 16 */
+  remPx?: number
+  /** @default 2 */
+  scale?: number
+  /** @default "svg" */
+  target?: 'svg' | 'html'
+}
+
+const options = Astro.props
+
+const html = compiler.html(
+  'src' in options
+    ? { mainFilePath: options.src }
+    : 'code' in options
+      ? {
+          mainFileContent: options.code,
+        }
+      : options.input,
+)
+---
+
+<div set:html={html} />

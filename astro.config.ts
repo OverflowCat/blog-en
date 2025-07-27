@@ -24,7 +24,9 @@ export default defineConfig({
       devtoolsJson(),
     ],
     ssr: {
-      external: ['@myriaddreamin/typst-ts-node-compiler'],
+      external: [
+        'fsevents',
+      ],
     },
   },
   markdown: {
