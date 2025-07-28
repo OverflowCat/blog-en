@@ -35,6 +35,14 @@ const cssExtend = {
     'white-space': 'normal',
     'word-wrap': 'break-word',
   },
+
+  'h2': {
+    'font-size': '1.5em',
+  },
+
+  'h3': {
+    'font-size': '1.25em',
+  },
 }
 
 export default defineConfig({

@@ -46,6 +46,10 @@ export const defaultConfig: ThemeConfig = {
         name: 'About',
         href: '/about',
       },
+      {
+        name: '中文博客',
+        href: 'https://blog.xinshijiededa.men/',
+      },
     ],
     categoryMap: [
       // { name: '胡适', path: 'hu-shi' }

@@ -4,6 +4,7 @@
   --uno-fonts-ui: theme('fontFamily.ui');
   --uno-colors-shadow: theme('colors.shadow');
 }
+
 html {
   --at-apply: antialiased;
   --at-apply: 'bg-background c-primary font-ui text-shadow-color-shadow';
@@ -26,6 +27,39 @@ html {
   --at-apply: 'border-b-2px border-transparent';
   --at-apply: 'duration-300ms ease-in-out';
   --at-apply: 'hover:(border-b-primary)';
+}
+
+a[href^='http']:not(:has(span))::after {
+  content: '↗';
+  transition: opacity 0.3s ease-in-out;
+  text-decoration-color: transparent;
+  font-size: 0.85em;
+  font-family:
+    'Noto Sans', 'Noto Sans CJK SC', 'PingFang SC', 'Noto Sans CJK TC', 'Noto Sans CJK JP', 'Calibri',
+    'Segoe UI Symbol', '.LucidaGrandeUI-Bold', 'Lucida Grande', 'Segoe UI', 'Arial', sans-serif;
+}
+
+a[href^='#'] {
+  --at-apply: 'no-underline mis-.5ch';
+  font-size: 0.9em;
+}
+
+:where(h2, h3, h4, h5, h6) a {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+:where(h2, h3, h4, h5, h6):hover a {
+  opacity: 1;
+}
+
+h2,
+h3,
+h4,
+h5,
+h6,
+figcaption {
+  font-family: 'HarmonyOS Sans Condensed', var(--uno-fonts-ui);
 }
 
 .dark p svg.typst-doc {

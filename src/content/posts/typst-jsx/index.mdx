@@ -1,0 +1,291 @@
+---
+title: How to bring JSX into Typst
+pubDate: 2025-07-28
+categories: []
+description: '… or any markup language you like.'
+slug: typst-jsx
+draft: true
+---
+
+{/* I'm the author of `astro-typst`. Many of you might already be using this Astro integration to build your blogs. The reason I haven't promoted it on Discord before is that I felt the internal implementation wasn't quite elegant enough. */}
+
+For those who may not be familiar, Astro is a web metaframework that excels at building fast, content-focused static websites, including this one.
+One of its most powerful features is the integrations system, which allows you to use various frontend frameworks like React, Vue, and Svelte within the same project.
+While typst do have HTML export, writing it by hand is rarely an enjoyable task. That's why it's best to leave the front-end matters to the front-end tools. Therefore I created `astro-typst`, an Astro integration for Typst.
+
+Even better, as a content-first framework, Astro supports MDX. This means you can import and embed dynamic components directly into your Markdown files. So, how can we bring this capability to other markup languages, such as Typst?
+
+## Embedding Components in Typst
+
+Let me show you the final API first.
+To embed a component in your Typst document, you need to add a tiny helper function:
+
+```typ
+#let jsx = s => html.elem("script", attrs: ("data-jsx": s))
+```
+
+You can customize the syntax however you like, just make sure it returns in this format:
+
+```typ
+// for example, as code block
+#let jsx2 = cb => html.elem("script", attrs: ("data-jsx": cb.text))
+```
+
+Then, to add an interactive counter component to your page, you would simply write:
+
+````typ
+#jsx("import Counter from '../components/Counter.astro'")
+#jsx("<Counter client:load />")
+
+// or:
+
+#jsx2[```jsx
+<Counter initialCount={10} message='typst' />
+```]
+````
+
+This is the entire API you need to know. But what happens next is where the magic really begins.
+
+
+## The rendering pipeline
+
+Let's first take a look at how Astro's MD(X) rendering process works — it uses the Unified ecosystem pipeline, which converts content to HTML through three stages: `remark`, `rehype`, and `recma`.
+
+```js
+MDX
+├ remark-parse
+├ remark-mdx
+├ remark-mark-and-unravel
+├ ...settings.remarkPlugins
+├ remark-rehype
+├ ...settings.rehypePlugins
+├ rehype-remove-raw
+├ rehype-recma
+├ recma-document
+├ recma-jsx-rewrite
+├ recma-build-jsx
+├ recma-build-jsx-transform
+├ recma-jsx
+├ recma-stringify
+├ ...settings.recmaPlugins
+JS
+```
+
+Thanks to the work of meriad-dreamin, who added hᴀsᴛ (the abstract syntax tree used by `rehype`) output to `typst.ts`, achieving this for Typst became straightforward.
+We just need to ensure that the JSX parts are present in the hᴀsᴛ.
+Then, we can add a `rehype` plugin to transform this hᴀsᴛ into a structure identical to what MDX produces.
+By feeding this into the rest of Astro's pipeline, we can effectively swap out the markup language while achieving the same results.
+
+## The tag
+
+Now, back to the `html.elem` we created earlier.
+When the Typst compiler processes your document,
+the `#jsx` function produces a `<script>` tag in the intermediate hᴀsᴛ:
+
+```html
+<script data-jsx="<Counter client:load />"></script>
+```
+
+This special tag acts as a marker.
+
+But, how can this tag be processed? The first idea is to fake a similar structure to the MDX parser.
+So, I implemented a simple function that traps property access on an object to see which properties were actually being accessed, and added a plugin that prints the AST:
+
+```js
+function rehypeStealMdxhast() {
+  return function (tree: any, file: any) {
+    // Store the tree in the file data for later retrieval
+    file.data.mdxhast = JSON.parse(JSON.stringify(tree));
+  };
+}
+
+...
+
+await compile(mdxContent, {
+    outputFormat: 'function-body',
+    development: false,
+    rehypePlugins: [rehypeStealMdxhast],
+});
+```
+
+By adjusting the position of the plugin, we can get the AST at the right time.
+
+Here is an example of the AST:
+
+<script src="https://unpkg.com/@alenaksu/json-viewer@2.1.0/dist/json-viewer.bundle.js"></script>
+
+import esTree from "./_estree.json?raw";
+
+<json-viewer style='--font-family: JetBrains Mono,SFMono-Regular,ui-monospace,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace' data={esTree} />
+
+I then discovered that the `estree` data had already been populated as early as the remark phase. So, no luck, we need to manually parse the JSX string.
+
+## Parse it, one piece at a time
+
+From here, our custom processor, **`typstx`**, which is my [fork](https://github.com/OverflowCat/hastx/blob/main/packages/mdx/lib/core.js) of the MDX plugin, takes over.
+It walks the hᴀsᴛ looking for these exact `<script data-jsx="...">` tags.
+
+For each tag it finds, `typstx` initializes a new, self-contained MDX parser to process the JSX string inside the `data-jsx` attribute.
+
+```js
+const createJsxProcessor = () => {
+  const pipelineJsx = unified()
+    .use(remarkParse)
+    .use(remarkMdx)
+    .use(remarkMarkAndUnravel)
+    .use(remarkRehype, {
+      allowDangerousHtml: true,
+      passThrough: [...nodeTypes]
+    })
+    .use(hastHastify)
+
+  return pipelineJsx
+}
+```
+
+This approach is straightforward, though it means a separate parsing process is kicked off for every dynamic component on the page. The parser converts the JSX string into a hᴀsᴛ fragment representing the component.
+
+The above pipeline is wrapped in another transformer, `rehypeTransformJsxInTypst`:
+
+```js
+export const rehypeTransformJsxInTypst = () => {
+  // find all html.elem("script", attrs: ("data-jsx": "import Button from 'Button.jsx;'"))
+  // and transform them to html.elem("script", attrs: ("data-jsx": "import Button from 'Button.jsx;'"))
+  function compileJsx(node) {
+    if (node.type === 'element' && node.tagName === 'script') {
+      let hast = jsx2hast(node.properties['data-jsx'])
+      hast = hast.children[0]
+      ...
+      return hast
+    }
+    if (node.children) {
+      node.children = node.children.map(compileJsx)
+    }
+    return node
+  }
+
+  return function (tree, file) {
+    return compileJsx(tree)
+  }
+}
+```
+
+By recursively calling `compileJsx`, we can make sure all the `<script>` tags are processed. This new component fragment then replaces the original `<script>` tag in the main hᴀsᴛ tree.
+
+## No magic, just strings
+
+After all tags have been replaced, `typstx` turns the AST into a string of a JavaScript module ready for execution.
+Astro doesn't read a list of dependencies; it takes this entire generated script and executes it using its server-side JavaScript runtime.
+The runtime's own module loader then resolves these `import` statements, just as it would in any standard `.js` or `.ts` file.
+This is how your components are located and bundled.
+
+Furthermore, to ensure components render correctly within the Astro ecosystem, `typstx` accepts a `jsxImportSource` option.
+We set this to `'astro'`, which tells the compiler to generate code that calls Astro's specific rendering functions (e.g., from `'astro/jsx-runtime'`) instead of another framework's.
+
+For further performance gains, this repetitive parsing logic should be eliminated — rehype plugin could be used to transform different import statements directly into an AST object that already includes the `estree` data.
+But I think the current implementation is more flexible and good enough.
+
+```js
+if (node.type === 'mdxjsEsm' ||
+    node.type === 'mdxTextExpression' ||
+    node.type === 'mdxFlowExpression' ||
+    node.type === 'mdxJsxAttribute' ||
+    node.type === 'mdxJsxAttributeValueExpression' ||
+    node.type === 'mdxJsxExpressionAttribute') { ... }
+```
+
+## The quirks of `unist`
+
+Another implementation detail is that, it is not that easy to re-use the `unist` pipeline. A normal MDX process is from Markdown file to HTML / JSX, which are both file or string, i.e. `VFile`.
+But, in our case, the input is a JSObject hᴀsᴛ tree created by typst.ts in Rust using N-API.
+Also, when creating a MDX parser, we need the output to be an `estree` object. Nor is that a string or a `VFile`.
+
+The two process, from VFile to AST or from AST to string, are what `Parser`s and `Compiler`s are for.
+You may have used the two `remark-parse` and `rehype-stringify` before.
+
+```
+| ........................ process ........................... |
+| .......... parse ... | ... run ... | ... stringify ..........|
+
+          +--------+                     +----------+
+Input ->- | Parser | ->- Syntax Tree ->- | Compiler | ->- Output
+          +--------+          |          +----------+
+                              X
+                              |
+                       +--------------+
+                       | Transformers |
+                       +--------------+
+```
+
+So, I manually created a fake `Parser` and `Compiler` to process the hᴀsᴛ tree:
+
+<figure>
+
+```js
+let __hast = null
+function tryParse() {
+  // @ts-ignore
+  this.parser = parser
+  function parser(_doc, file) {
+    if (body) {
+      __hast = __hast.children.filter((x) => x.tagName === 'body')
+      __hast = __hast.at(0)
+    }
+    return __hast
+  }
+}
+```
+
+<figcaption class="text-end mbs-0">Yes, since the code is not async, we modify the `__hast` every time we call `tryParse`.</figcaption>
+</figure>
+
+And a fake `Compiler` to convert the `estree` object to a string:
+
+```js
+export default function hastHastify() {
+  /** @type {Processor<undefined, undefined, undefined, Root, string>} */
+  const self = this
+
+  self.compiler = compiler
+
+  function compiler(tree) {
+    return tree
+  }
+}
+```
+
+## Enjoy the ecosystem
+
+By doing this, we can enjoy the power of the ecosystem:
+
+- While some frontend frameworks don't natively use JSX syntax, Astro handily converts their output to JSX for us.
+
+- We can now (re-)use rehype plugins rather than writing `html.elem` everywhere, which is a non-invasive way to enhance the HTML output. For example, I use this to add GitHub-like anchors for headings:
+
+  ```ts
+  import rehypeAutolinkHeadings, { type Options } from "rehype-autolink-headings";
+  export default [
+    rehypeAutolinkHeadings,
+    {
+      content: [
+         {
+           type: "element",
+           tagName: "span",
+           properties: { className: ["anchor"] },
+           children: [{ type: "text", value: "#" }],
+         },
+      ],
+      behavior: "append",
+    } satisfies Options,
+  ];
+  ```
+
+What's more, you can directly import animated and interactive ECharts components without needing to render them through WASM, which is also more performant. If you want, you can even check the output `target` and use `json()` to share code between `echarm` (for PDF output) and your front-end components (for HTML output). The possibilities are endless!
+
+## Try it out
+
+You can see a demo of this in action on this webpage. Although this feature is now in the `master` branch, a full hᴀsᴛ-based approach might have performance implications and hasn't been thoroughly tested yet.
+
+Theoretically, the same approach can be applied to other markup languages, such as org-mode, as long as they have corresponding hᴀsᴛ generators. Also, suppporting other JSX runtimes is possible, but I haven't tested it yet.
+
+Anyway, if you'd like to give it a try, you can install the beta version of the npm package. Feedbacks are welcome!

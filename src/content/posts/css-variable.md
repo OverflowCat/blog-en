@@ -1,5 +1,5 @@
 ---
-title: A CSS variable, a change in spec, and a VS Code fix
+title: A CSS variable, a hidden change in spec, and a VS Code fix
 pubDate: 2025-07-14
 modDate: 2025-07-26
 categories: ["CSS"]
