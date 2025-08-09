@@ -53,6 +53,11 @@ a[href^='#'] {
   opacity: 1;
 }
 
+a:focus {
+  outline: 2px solid var(--uno-colors-primary);
+  outline-offset: 2px;
+}
+
 h2,
 h3,
 h4,

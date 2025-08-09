@@ -1,17 +1,30 @@
 ---
 title: How to bring JSX into Typst
-pubDate: 2025-07-28
-categories: []
+pubDate: 2025-07-29
+categories:
+  - Typst
+  - Astro
 description: '… or any markup language you like.'
 slug: typst-jsx
-draft: true
+banner: ./confetti.png
 ---
+
+<figure>
+<video width="3358" height="2014" controls poster="https://remnote-user-data.s3.amazonaws.com/-YIdkWI5rTGJ07x5il3Sy6Z3hYgOlReMLQHZhWaz7cwoDTVyL5RF5t9MclNYnzmJOuf4u5K3cPjyiKwOQX0eDxqiaI_t8w5Bnfu1tpK3ndvrPGbits_ny-ZivOvwMbCE.png">
+  <source src="https://tong.xinshijiededa.men/typst-jsx.mp4" type="video/mp4" />
+  Your browser does not support the video tag.
+</video>
+<figcaption class="text-end mbs-0">
+  Typst + `react-confetti-explosion`
+</figcaption>
+</figure>
 
 {/* I'm the author of `astro-typst`. Many of you might already be using this Astro integration to build your blogs. The reason I haven't promoted it on Discord before is that I felt the internal implementation wasn't quite elegant enough. */}
 
 For those who may not be familiar, Astro is a web metaframework that excels at building fast, content-focused static websites, including this one.
 One of its most powerful features is the integrations system, which allows you to use various frontend frameworks like React, Vue, and Svelte within the same project.
-While typst do have HTML export, writing it by hand is rarely an enjoyable task. That's why it's best to leave the front-end matters to the front-end tools. Therefore I created `astro-typst`, an Astro integration for Typst.
+While Typst do have HTML export, writing it by hand is rarely an enjoyable task.
+That's why it's best to leave the frontend matters to the frontend tools, and why I created `astro-typst`, an Astro integration for Typst.
 
 Even better, as a content-first framework, Astro supports MDX. This means you can import and embed dynamic components directly into your Markdown files. So, how can we bring this capability to other markup languages, such as Typst?
 
@@ -71,7 +84,7 @@ MDX
 JS
 ```
 
-Thanks to the work of meriad-dreamin, who added hᴀsᴛ (the abstract syntax tree used by `rehype`) output to `typst.ts`, achieving this for Typst became straightforward.
+Thanks to the work of [myriad-dreamin](https://i.myriad-dreamin.com/), who added hᴀsᴛ (the abstract syntax tree used by `rehype`) output to her [typst.ts](https://github.com/myriad-dreamin/typst.ts), achieving this for Typst became straightforward.
 We just need to ensure that the JSX parts are present in the hᴀsᴛ.
 Then, we can add a `rehype` plugin to transform this hᴀsᴛ into a structure identical to what MDX produces.
 By feeding this into the rest of Astro's pipeline, we can effectively swap out the markup language while achieving the same results.
@@ -197,7 +210,7 @@ if (node.type === 'mdxjsEsm' ||
 ## The quirks of `unist`
 
 Another implementation detail is that, it is not that easy to re-use the `unist` pipeline. A normal MDX process is from Markdown file to HTML / JSX, which are both file or string, i.e. `VFile`.
-But, in our case, the input is a JSObject hᴀsᴛ tree created by typst.ts in Rust using N-API.
+But, in our case, the input is a JsObject hᴀsᴛ tree created by typst.ts in Rust using N-API.
 Also, when creating a MDX parser, we need the output to be an `estree` object. Nor is that a string or a `VFile`.
 
 The two process, from VFile to AST or from AST to string, are what `Parser`s and `Compiler`s are for.
@@ -280,7 +293,7 @@ By doing this, we can enjoy the power of the ecosystem:
   ];
   ```
 
-What's more, you can directly import animated and interactive ECharts components without needing to render them through WASM, which is also more performant. If you want, you can even check the output `target` and use `json()` to share code between `echarm` (for PDF output) and your front-end components (for HTML output). The possibilities are endless!
+What's more, you can directly import animated and interactive ECharts components without needing to render them through WASM, which is also more performant. If you want, you can even check the output `target` and use `json()` to share code between [echarm](https://typst.app/universe/package/echarm/) (for PDF output) and your frontend components (for HTML output). The possibilities are endless!
 
 ## Try it out
 
