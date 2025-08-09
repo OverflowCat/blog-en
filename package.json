@@ -73,7 +73,7 @@
     "unocss": "^66.3.3",
     "unocss-preset-theme": "^0.14.1",
     "vite-plugin-devtools-json": "^0.3.0",
-    "wrangler": "^4.26.0"
+    "wrangler": "^4.27.0"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged"
