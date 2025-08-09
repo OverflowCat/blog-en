@@ -28,6 +28,10 @@ export const defaultConfig: ThemeConfig = {
         name: 'mastodon',
         href: 'https://mastodon.social/@overflowcat',
       },
+      {
+        name: 'ideogram-cjk-variant',
+        href: 'https://blog.xinshijiededa.men/',
+      },
     ],
     navLinks: [
       {
@@ -46,16 +50,13 @@ export const defaultConfig: ThemeConfig = {
         name: 'About',
         href: '/about',
       },
-      {
-        name: '中文博客',
-        href: 'https://blog.xinshijiededa.men/',
-      },
     ],
     categoryMap: [
       // { name: '胡适', path: 'hu-shi' }
     ],
     footer: [
       '© %year <a target="_blank" href="%website">%author</a> CC-BY-SA 4.0',
+      'Chinese blog: <a target="_blank" href="https://blog.xinshijiededa.men/">新世界的大门</a>',
       'Theme <a target="_blank" href="https://github.com/Moeyua/astro-theme-typography">Typography</a> by <a target="_blank" href="https://moeyua.com">Moeyua</a>',
       'Proudly published with <a target="_blank" href="https://astro.build/">Astro</a>',
     ],

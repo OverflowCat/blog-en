@@ -252,7 +252,7 @@ function tryParse() {
 <figcaption class="text-end mbs-0">Yes, since the code is not async, we modify the `__hast` every time we call `tryParse`.</figcaption>
 </figure>
 
-And a fake `Compiler` to convert the `estree` object to a string:
+And a fake `Compiler` to force unified to think that it has converted the `estree` object to a string:
 
 ```js
 export default function hastHastify() {
@@ -297,8 +297,9 @@ What's more, you can directly import animated and interactive ECharts components
 
 ## Try it out
 
-You can see a demo of this in action on this webpage. Although this feature is now in the `master` branch, a full hᴀsᴛ-based approach might have performance implications and hasn't been thoroughly tested yet.
+You can see a demo of this in action [here](https://typst.overflow.cat).
+Although this feature has been merged into the `master` branch, a full hᴀsᴛ-based approach might have performance implications and hasn't been thoroughly tested yet.
 
-Theoretically, the same approach can be applied to other markup languages, such as org-mode, as long as they have corresponding hᴀsᴛ generators. Also, suppporting other JSX runtimes is possible, but I haven't tested it yet.
+Theoretically, the same approach can be applied to other markup languages, such as org-mode, as long as they have corresponding hᴀsᴛ generators. Also, supporting other JSX runtimes is possible, but I haven't tested it yet.
 
 Anyway, if you'd like to give it a try, you can install the beta version of the npm package. Feedbacks are welcome!
