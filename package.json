@@ -44,7 +44,7 @@
     "typstx": "0.0.1-beta.1"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^4.19.0",
+    "@antfu/eslint-config": "^5.0.0",
     "@iconify-json/mdi": "^1.2.3",
     "@myriaddreamin/typst-ts-node-compiler": "0.6.1-rc2",
     "@types/markdown-it": "^14.1.2",
